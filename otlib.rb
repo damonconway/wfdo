@@ -19,7 +19,7 @@ class OTLib
       @server_groups << k
     end
     cluster_info['host'].each do |k,v|
-      @hosts << k
+      @hosts << k unless k == 'master'
     end
     cluster_info['deployment'].each do |k,v|
       @deployments << k
