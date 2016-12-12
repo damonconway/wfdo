@@ -1,7 +1,3 @@
-#!/usr/bin/env ruby
-#
-#
-
 require 'json'
 require 'net/http'
 require 'uri'
@@ -27,6 +23,7 @@ class OTLib
   end
 
   def drain(group)
+    url = "#{@uri}/"
   end
 
   def is_drained(group)
