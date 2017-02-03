@@ -2,7 +2,7 @@ require 'json'
 require 'net/http'
 require 'uri'
 
-class OTLib
+class Wfdo
   def initialize(port='9999', proto='http', user='wildfly', pass='Cee1geev', host)
     @uri = URI("#{proto}://#{user}:#{pass}@#{host}:#{port}/management")
     @req = Net::HTTP::Get.new(@uri)
