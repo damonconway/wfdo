@@ -22,7 +22,7 @@ class OTLib
     end
   end
 
-  def drain(group)
+  def drain(group=false, host=false, server=false)
     url = "#{@uri}/"
   end
 
