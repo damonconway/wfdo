@@ -1,2 +1,2 @@
-# wfadmin
+# wfdo
 Assist sysadmins in automating wildfly servers from shell scripts
