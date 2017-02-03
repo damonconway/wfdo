@@ -1,0 +1,141 @@
+#!/usr/bin/env ruby
+
+require 'trollop'
+require 'Wfdo'
+
+# Setup new options structure and set defaults.
+SUB_COMMANDS = %w(deploy drain list restart start stop undeploy)
+global_options = Trollop::options do
+  banner <<-EOS
+This program handles various administrative tasks having to do with ONtrack installs.
+
+Commands: #{SUB_COMMANDS}
+
+Usage: #{$PROGRAM_NAME} [options] command [options]
+
+EOS
+  opt :debug, "Turn on debugging", :default => false, :short => "-d"
+  opt :dryrun, "Don't actually do anything", :default => false
+  opt :verbose, "Be verbose", :default => false, :short => "-v"
+  opt :controller, "JBoss domain controller to execute against", :short => "-c", :default => "localhost"
+  stop_on SUB_COMMANDS
+end
+
+# Set the subcommand and its options
+cmd = ARGV.shift
+cmd_opts = case cmd
+  when "deploy" # Deploy a package
+    Trollop::options do
+      banner "Deploy code"
+      opt :disabled, "Deploy to the cluster, but don't assign to any groups"
+      opt :groups, "Deploy code to server(s) in group(s)", :type => :strings
+      opt :servers, "Drain code to server(s)", :type => :strings
+    end
+  when "drain" # Drain server(s), host(s), or group(s)
+    Trollop::options do
+      banner "Drain servers (JVMs) on a host (hc)"
+      opt :groups, "Drain server(s) in group(s)", :type => :strings
+      opt :hosts, "Drain server(s) on host(s)", :short => "-H", :type => :strings
+      opt :servers, "Drain server(s)", :type => :strings
+    end
+  when "list"  # List deployments, hosts, servers, or groups
+    Trollop::options do
+      banner "List the available hosts, servers, or groups"
+      opt :deployments, "List installed deployments", :short => "-D"
+      opt :groups, "List available groups"
+      opt :hosts, "List available hosts", :short => "-H"
+      opt :servers, "List available servers"
+    end
+  when "restart" # Do a rolling restart of servers
+    Trollop::options do
+      banner "Do a rolling restart of servers (JVMs)"
+      opt :groups, "Only restart servers on group(s)", :type => :strings
+      opt :hosts, "Only restart servers on host(s)", :short => "-H", :type => :strings
+      opt :justdoit, "Do a hard restart without waiting for sessions to drain", :short => "-J"
+      opt :number, "Number of servers to take offline at once", :default => 1, :short => "-n", :type => :int
+      opt :servers, "Restart server(s)", :type => :strings
+    end
+  when "start" # Start server(s), host(s), or group(s)
+    Trollop::options do
+      banner "Start server(s) (JVMs)"
+      opt :groups, "Start server(s) in group(s)", :type => :strings
+      opt :hosts, "Start server(s) on host(s)", :short => "-H", :type => :strings
+      opt :servers, "Start server(s)", :type => :strings
+    end
+  when "stop" # Stop server(s), host(s), or group(s)
+    Trollop::options do
+      banner "Stop servers (JVMs) on a host (hc)"
+      opt :groups, "Stop server(s) in group(s)", :type => :strings
+      opt :hosts, "Stop server(s) on host(s)", :short => "-H", :type => :strings
+      opt :justdoit, "Do a hard stop without waiting for sessions to drain", :short => "-J"
+      opt :servers, "Stop server(s)", :type => :strings
+    end
+  when "undeploy" # Deploy a package
+    Trollop::options do
+      banner "Undeploy code"
+      opt :keep, "Keep the code on the system"
+      opt :groups, "Undeploy code from server(s) in group(s)", :type => :strings
+      opt :servers, "Undeploy code from server(s)", :type => :strings
+    end
+  else
+    Trollop::die "unknown subcommand #{cmd.inspect}"
+end
+
+puts "Global options: #{global_options.inspect}" if global_options.debug
+puts "Subcommand: #{cmd.inspect}" if global_options.debug
+puts "Subcommand options: #{cmd_opts.inspect}" if global_options.debug
+puts "Remaining arguments: #{ARGV.inspect}" if global_options.debug
+
+# Initialize our object
+#wf = Wfdo.new(host=global_options.controller)
+case cmd
+when "deploy"
+  puts "Doing a deploy" if global_options.debug
+  if cmd_opts.groups
+    cmd_opts.groups[0].split(',').each do |g|
+      puts g
+    end
+  elsif cmd_opts.servers
+    cmd_opts.servers[0].split(',').each do |s|
+      puts s
+    end
+  end
+when "drain"
+  puts "Doing a drain" if global_options.debug
+  if cmd_opts.groups
+    cmd_opts.groups[0].split(',').each do |g|
+      puts g
+    end
+  elsif cmd_opts.hosts
+    cmd_opts.hosts[0].split(',').each do |h|
+      puts h
+    end
+  elsif cmd_opts.servers
+    cmd_opts.servers[0].split(',').each do |s|
+      puts s
+    end
+  else
+    die "ERROR: Must specify --groups, --hosts, or --servers."
+  end
+when "list"
+  puts "Doing a list" if global_options.debug
+  if cmd_opts.deployments
+    cmd_opts.deployments[0].split(',').each do |d|
+      puts d
+    end
+  elsif cmd_opts.groups
+    cmd_opts.groups[0].split(',').each do |g|
+      puts g
+    end
+  end
+when "restart"
+  puts "Doing a restart" if global_options.debug
+when "start"
+  puts "Doing a start" if global_options.debug
+when "stop"
+  puts "Doing a stop" if global_options.debug
+when "undeploy"
+  puts "Doing an undeploy" if global_options.debug
+end
+
+# vi:syntax=ruby
